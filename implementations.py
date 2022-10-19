@@ -52,8 +52,13 @@ def mean_squared_error_gd(y, tx, initial_w, max_iters, gamma):
 
     return w, loss  # last w vector and the corresponding loss
 
+#  Main functions
+
 
 def mean_squared_error_sgd(y, tx, initial_w, max_iters, gamma):
+    """
+    Parameters
+    """
     w = initial_w
     loss = 0
     for n_iters in range(max_iters):
@@ -67,14 +72,20 @@ def mean_squared_error_sgd(y, tx, initial_w, max_iters, gamma):
 
 
 def least_squares(y, tx):
+    """
+    Parameters
+    """
     a = tx.T.dot(tx)
     b = tx.T.dot(y)
-    w = np.linalg.lstsq(a, b, rcond=None) # use .lstsq or .solve ?
+    w = np.linalg.lstsq(a, b, rcond=None)  # use .lstsq or .solve ?
     loss = compute_mse(y, tx, w)
     return w, loss
 
 
 def ridge_regression(y, tx, lambda_):
+    """
+    Parameters
+    """
     aI = lambda_ * np.identity(tx.shape[1])
     a = tx.T.dot(tx) + aI
     b = tx.T.dot(y)
@@ -84,6 +95,9 @@ def ridge_regression(y, tx, lambda_):
 
 
 def logistic_regression(y, tx, initial_w, max_iters, gamma):
+    """
+    Parameters
+    """
     w = initial_w
     losses = []
     threshold = 1e-8
@@ -102,6 +116,9 @@ def logistic_regression(y, tx, initial_w, max_iters, gamma):
 
 
 def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
+    """
+    Parameters
+    """
     w = initial_w
     losses = []
     threshold = 1e-8
