@@ -4,7 +4,7 @@ import seaborn as sb
 from helpers import *
 
 
-def load_data(standard=False):
+def load_data(standard=True):
     # Load data using helpers.py functions and standardize it
     y, tx, ids = load_csv_data(data_path="C:/Users/Daniel/OneDrive/Bureau/EPFL/Master/ML/train.csv")
     if standard:
@@ -30,6 +30,7 @@ def sigmoid(t):
 
 
 def compute_logistic_gradient(y, tx, w):
+
     pred = sigmoid(tx.dot(w))
     grad = tx.T.dot(pred - y)
     return grad
@@ -38,7 +39,7 @@ def compute_logistic_gradient(y, tx, w):
 def compute_logistic_loss(y, tx, w):
     model = tx.dot(w)
     # loss = y.T.dot(np.log(pred)) + (1 - y).T.dot(np.log(1 - pred))
-    loss = np.sum(np.log(1 + np.exp(model)) - y.dot(model), axis=0)
+    loss = np.sum(np.log(1 + np.exp(model)) - y*model)
     return np.squeeze(loss)
 
 
