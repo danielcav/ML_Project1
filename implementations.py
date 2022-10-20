@@ -36,9 +36,10 @@ def compute_logistic_gradient(y, tx, w):
 
 
 def compute_logistic_loss(y, tx, w):
-    pred = sigmoid(tx.dot(w))
-    loss = y.T.dot(np.log(pred)) + (1 - y).T.dot(np.log(1 - pred))
-    return np.squeeze(- loss)
+    model = tx.T.dot(w)
+    # loss = y.T.dot(np.log(pred)) + (1 - y).T.dot(np.log(1 - pred))
+    loss = np.sum(np.log(1 + np.exp(model)) - y.dot(model), axis=0)
+    return np.squeeze(loss)
 
 
 def mean_squared_error_gd(y, tx, initial_w, max_iters, gamma):
@@ -89,8 +90,7 @@ def ridge_regression(y, tx, lambda_):
     a = tx.T.dot(tx) + aI
     b = tx.T.dot(y)
     w = np.linalg.solve(a, b)
-    loss = compute_mse(y, tx, w)
-    return w, loss
+    return w, compute_mse(y, tx, w)
 
 
 def logistic_regression(y, tx, initial_w, max_iters, gamma):
@@ -111,7 +111,7 @@ def logistic_regression(y, tx, initial_w, max_iters, gamma):
         losses.append(loss)
         if len(losses) > 1 and np.abs(losses[-1] - losses[-2]) < threshold:
             break
-    return w, losses[-1]
+    return w, compute_logistic_loss(y, tx, w)
 
 
 def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
@@ -132,4 +132,4 @@ def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
         losses.append(loss)
         if len(losses) > 1 and np.abs(losses[-1] - losses[-2]) < threshold:
             break
-    return w, losses[-1]
+    return w, compute_logistic_gradient(y, tx, w)
