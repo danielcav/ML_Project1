@@ -37,7 +37,7 @@ def compute_logistic_gradient(y, tx, w):
 
 def compute_logistic_loss(y, tx, w):
     pred = sigmoid(tx.dot(w))
-    loss = y.T.dot(np.log(pred)) + (1 - y).T.dot(np.log(1 - pred))
+    loss = (y.T.dot(np.log(pred)) + (1 - y).T.dot(np.log(1 - pred)))/y.shape[0]
     # loss = np.sum(np.log(1 + np.exp(model)) - y*model)
     return np.squeeze(-loss)
 
