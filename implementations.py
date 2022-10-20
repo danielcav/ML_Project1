@@ -84,7 +84,8 @@ def ridge_regression(y, tx, lambda_):
     """
     Parameters
     """
-    aI = lambda_ * np.identity(tx.shape[1])
+    lambda_prime = 2 * tx.shape[0] * lambda_
+    aI = lambda_prime * np.identity(tx.shape[1])
     a = tx.T.dot(tx) + aI
     b = tx.T.dot(y)
     w = np.linalg.solve(a, b)
