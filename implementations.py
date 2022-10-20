@@ -42,8 +42,11 @@ def compute_logistic_loss(y, tx, w):
 
 
 def mean_squared_error_gd(y, tx, initial_w, max_iters, gamma):
+    """
+    Parameters
+    """
     w = initial_w
-    loss = 0
+    loss = compute_mse(y, tx, w)
     for n_iter in range(max_iters):
         grad = compute_gradient(y, tx, w)
         loss = compute_mse(y, tx, w)
