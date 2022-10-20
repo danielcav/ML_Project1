@@ -4,7 +4,7 @@ import seaborn as sb
 from helpers import *
 
 
-def load_data(standard=True):
+def load_data(standard=False):
     # Load data using helpers.py functions and standardize it
     y, tx, ids = load_csv_data(data_path="C:/Users/Daniel/OneDrive/Bureau/EPFL/Master/ML/train.csv")
     if standard:
@@ -46,14 +46,11 @@ def mean_squared_error_gd(y, tx, initial_w, max_iters, gamma):
     Parameters
     """
     w = initial_w
-    loss = compute_mse(y, tx, w)
     for n_iter in range(max_iters):
         grad = compute_gradient(y, tx, w)
-        loss = compute_mse(y, tx, w)
         # update w by gradient descent
         w -= gamma * grad
-
-    return w, loss  # last w vector and the corresponding loss
+    return w, compute_mse(y, tx, w)  # last w vector and the corresponding loss
 
 #  Main functions
 
@@ -63,15 +60,13 @@ def mean_squared_error_sgd(y, tx, initial_w, max_iters, gamma):
     Parameters
     """
     w = initial_w
-    loss = 0
     for n_iters in range(max_iters):
         for batch_y, batch_tx in batch_iter(y, tx, 1):  # standard mini-batch-size 1
             grad = compute_gradient(batch_y, batch_tx, w)
-            loss = compute_mse(batch_y, batch_tx, w)
             # update w by gradient descent
             w -= gamma * grad
 
-    return w, loss  # last w vector and the corresponding loss
+    return w, compute_mse(y, tx, w)  # last w vector and the corresponding loss
 
 
 def least_squares(y, tx):
@@ -80,7 +75,7 @@ def least_squares(y, tx):
     """
     a = tx.T.dot(tx)
     b = tx.T.dot(y)
-    w = np.linalg.lstsq(a, b, rcond=None)  # use .lstsq or .solve ?
+    w = np.linalg.solve(a, b, rcond=None)  # use .lstsq or .solve ?
     loss = compute_mse(y, tx, w)
     return w, loss
 
@@ -92,7 +87,7 @@ def ridge_regression(y, tx, lambda_):
     aI = lambda_ * np.identity(tx.shape[1])
     a = tx.T.dot(tx) + aI
     b = tx.T.dot(y)
-    w = np.linalg.lstsq(a, b, rcond=None)
+    w = np.linalg.solve(a, b, rcond=None)
     loss = compute_mse(y, tx, w)
     return w, loss
 
