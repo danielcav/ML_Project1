@@ -1,8 +1,9 @@
 from implementations import *
 
 
-y, tx = load_data(False)
+y, tx = load_data(True)
+# print(y.max(), np.sort(tx.max(axis=1))[-6:-1])
 initial_w = np.ones(30)
-w, loss = logistic_regression(y, tx, initial_w, 100, 0.1)
 
-print(w, loss)
+loss = compute_logistic_loss(y, tx, initial_w)
+print(loss)
