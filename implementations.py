@@ -111,6 +111,10 @@ def logistic_regression(y, tx, initial_w, max_iters, gamma):
         losses.append(loss)
         if len(losses) > 1 and np.abs(losses[-1] - losses[-2]) < threshold:
             break
+        print(y)
+        print(tx)
+        print(w)
+        print("\n")
     return w, compute_logistic_loss(y, tx, w)
 
 
@@ -132,4 +136,4 @@ def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
         losses.append(loss)
         if len(losses) > 1 and np.abs(losses[-1] - losses[-2]) < threshold:
             break
-    return w, compute_logistic_gradient(y, tx, w)
+    return w, compute_logistic_loss(y, tx, w)
