@@ -160,8 +160,8 @@ def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
     threshold = 1e-8
     n = y.shape[0]
     for n_iter in range(max_iters):
-        loss = compute_logistic_loss(y, tx, w) + (lambda_/(2*n)) * np.squeeze(w.T.dot(w))
-        grad = compute_logistic_gradient(y, tx, w) + (lambda_/n) * w
+        loss = compute_logistic_loss(y, tx, w) - 0.5 * (lambda_ / n) * np.squeeze(w.T.dot(w))
+        grad = compute_logistic_gradient(y, tx, w) - (lambda_ / n) * w
         w -= gamma * grad
         # log info
         if n_iter % 100 == 0:
