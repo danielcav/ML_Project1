@@ -6,11 +6,30 @@ from helpers import *
 
 def standardize(x):
     """Standardize the original data set."""
-    mean_x = np.mean(x)
+    mean_x = np.mean(x, axis=0)
     x = x - mean_x
-    std_x = np.std(x)
+    std_x = np.std(x, axis=0)
     x = x / std_x
     return x, mean_x, std_x
+
+
+def reduce_outliers(x):
+    """
+    Reduce outliers of a vector using the mean and standard deviation method.
+    An outlier is defined as following : outlier = ¦x_value¦ > mean + 2 * (standard deviation).
+    Then the value is assigned as following : outlier = mean + 2 * (standard deviation).
+    """
+    mean = np.mean(np.squeeze(x))
+    std = np.std(np.squeeze(x))
+    threshold = mean + 2 * std
+    x_ = (x - mean) / std
+    for position, value in enumerate(x_):
+        if np.abs(value) > threshold:
+            x_[position] = threshold
+    return x_
+
+    x_clean = [threshold if np.abs(val) > threshold else x for val in x]
+    return x_clean
 
 
 def batch_iter(y, tx, batch_size, num_batches=1, shuffle=True):
