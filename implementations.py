@@ -60,7 +60,7 @@ def batch_iter(y, tx, batch_size, num_batches=1, shuffle=True):
 
 def load_data(standard=True):
     # Load data using helpers.py functions and standardize it
-    y, tx, ids = load_csv_data(data_path="C:/Users/Daniel/OneDrive/Bureau/EPFL/Master/ML/train.csv")
+    y, tx, ids = load_csv_data(data_path="data/train.csv")
     if standard:
         tx, x_mean, x_std = standardize(tx)
         y, y_mean, y_std = standardize(y)
