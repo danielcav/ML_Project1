@@ -28,7 +28,7 @@ def reduce_outliers(x):
             x_[position] = threshold
     return x_
 
-    x_clean = [threshold if np.abs(val) > threshold else x for val in x]
+    x_clean = [mean if np.abs(val) > threshold else x for val in x]
     return x_clean
 
 
@@ -69,17 +69,20 @@ def load_data(standard=True):
 
 def compute_gradient(y, tx, w):
     err = y - tx.dot(w)
-    grad = -tx.T.dot(err) / len(err)
+    grad = -tx.T.dot(err) / y.shape[0]
     return grad
 
 
 def compute_mse(y, tx, w):
     err = y - tx.dot(w)
-    return 0.5 * np.mean(err ** 2)
+    err[err > 1e150] = 1e150
+    err[err < -1e150] = -1e150
+    return 0.5 * np.linalg.norm(err)**2/y.shape[0]
 
 
 def sigmoid(t):
     """apply sigmoid function on t."""
+    t[t < -700] = -700
     return 1.0 / (1 + np.exp(-t))
 
 
@@ -90,9 +93,10 @@ def compute_logistic_gradient(y, tx, w):
 
 
 def compute_logistic_loss(y, tx, w):
-    pred = sigmoid(tx.dot(w))
-    loss = (y.T.dot(np.log(pred)) + (1 - y).T.dot(np.log(1 - pred))) / y.shape[0]
-    return np.squeeze(-loss)
+    pred = tx.dot(w)
+    pred[pred > 700] = 700  # justifier ca, pourquoi 700 et pas une autre valeur
+    loss = np.sum(np.log(1 + np.exp(pred)) - y*pred) / y.shape[0]
+    return loss
 
 
 # Implemented functions
@@ -157,9 +161,9 @@ def logistic_regression(y, tx, initial_w, max_iters, gamma):
     losses = []
     threshold = 1e-8
     for n_iter in range(max_iters):
-        loss = compute_logistic_loss(y, tx, w)
         grad = compute_logistic_gradient(y, tx, w)
         w -= gamma * grad
+        loss = compute_logistic_loss(y, tx, w)
         # log info
         if n_iter % 100 == 0:
             print("Current iteration={i}, loss={l}".format(i=n_iter, l=loss))
@@ -167,7 +171,8 @@ def logistic_regression(y, tx, initial_w, max_iters, gamma):
         losses.append(loss)
         if len(losses) > 1 and np.abs(losses[-1] - losses[-2]) < threshold:
             break
-    return w, compute_logistic_loss(y, tx, w)
+
+    return w, losses[-1]
 
 
 def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
@@ -179,9 +184,9 @@ def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
     threshold = 1e-8
     n = y.shape[0]
     for n_iter in range(max_iters):
-        loss = compute_logistic_loss(y, tx, w) + 0.5 * (lambda_ / n) * np.squeeze(w.T.dot(w))
         grad = compute_logistic_gradient(y, tx, w) + 2 * lambda_ * w
         w -= gamma * grad
+        loss = compute_logistic_loss(y, tx, w) + 0.5 * (lambda_ / n) * np.squeeze(w.T.dot(w))
         # log info
         if n_iter % 100 == 0:
             print("Current iteration={i}, loss={l}".format(i=n_iter, l=loss))
@@ -189,4 +194,4 @@ def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
         losses.append(loss)
         if len(losses) > 1 and np.abs(losses[-1] - losses[-2]) < threshold:
             break
-    return w, compute_logistic_loss(y, tx, w)
+    return w, losses[-1]
