@@ -305,6 +305,25 @@ def data_processing(y, tx):
     return x_test, to_remove
 
 
+def polynomial_features(x, features, degree=2):
+    """
+    Polynomial expansion without cross-interactions (such as feature1 * feature2).
+    Parameters
+    ----------
+    x : ndarray, features with samples
+    features : ndarray, indexes of features to expand
+    degree : int, maximum degree of the polynomial expansion
+
+    Return
+    ------
+    Returns the augmented data.
+    """
+    degrees = np.arange(2, (degree+1), 1)
+    #
+    x_aug = np.column_stack((x, np.ones(x.shape[0])))
+    for d in degrees:
+        x_aug = np.column_stack(([x_aug, x[:, features] ** d]))
+    return x_aug
 # Implemented functions
 
 
