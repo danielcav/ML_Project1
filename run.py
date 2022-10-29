@@ -4,16 +4,11 @@ from implementations import *
 
 # Data loading
 y, tx, ids = load_csv_data("C:/Users/Daniel/OneDrive/Bureau/EPFL/Master/ML/train.csv")
-x_control = tx
-
 # Data processing
-x_control = (min_max_scaling(x_control))
 x_test, to_replace = data_processing(y, tx)
-# Initializing weights
-w_control = np.ones(x_control.shape[1])
-w_test = np.ones(x_test.shape[1])
 
-w2, loss2 = ridge_regression(y, x_test, 0.0001)
+w2, loss2 = least_squares(y, x_test)
+print(loss2)
 """
 # Put back missing features for the submission
 for replace in to_replace:
