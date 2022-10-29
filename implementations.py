@@ -480,26 +480,6 @@ def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
 
 # Additional functions
 
-def least_squares(y, tx):
-    """Calculate the least squares solution.
-       returns mse, and optimal weights.
-    
-    Args:
-        y: numpy array of shape (N,), N is the number of samples.
-        tx: numpy array of shape (N,D), D is the number of features.
-    
-    Returns:
-        w: optimal weights, numpy array of shape(D,), D is the number of features.
-        mse: scalar."""
-    
-    n = tx.shape[0]
-    A = tx.T.dot(tx)
-    inv = np.linalg.inv(A)
-    w = inv.dot(tx.T.dot(y))
-    e = y-tx.dot(w)
-    mse = (np.linalg.norm(e)**2)/n
-    
-    return w, mse
 
 def newton_method(y, tx, initial_w, max_iters, gamma):
     """
