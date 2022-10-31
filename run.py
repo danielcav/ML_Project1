@@ -1,47 +1,33 @@
 import numpy as np
 import seaborn as sns
 from implementations import *
+from helpers import *
 
-# Data loading
-y, tx, ids = load_csv_data("C:/Users/Daniel/OneDrive/Bureau/EPFL/Master/ML/train.csv")
-# Data processing
-x_test, to_replace = data_processing(y, tx)
-features = np.arange(0, x_test.shape[1], 1)
-degree = np.arange(2, 21, 1)
-_, loss = least_squares(y, x_test)
-losses = np.array([0, loss])
+######## UNZIP DATA BEFORE RUNNING #############
 
-for deg in degree:
-    x_test_aug = polynomial_features(x_test, features, deg)
-    _, loss2 = least_squares(y, x_test_aug)
-    loss_deg = np.array([deg, loss2])
-    losses = np.column_stack((losses, loss_deg))
+# download train data
+SET_TRAIN = 'data/train.csv' 
+y, tx, ids = load_csv_data(SET_TRAIN)
 
-plt.plot(losses[0], losses[1])
-plt.show()
+# Initialization
+degree = np.arange(2, 25, 1)
+lambdas = np.logspace(-9, -6, 5)
 
-"""
-# Put back missing features for the submission
-for replace in to_replace:
-    w2 = np.insert(w2, replace, 0)
-"""
-##################################
-"""
-# Run ML algorithms with little data processing (control) and processed data (test)
-w1, loss_control, = ridge_regression(y, x_control, 0.00001)
-w2, loss2 = ridge_regression(y, x_test, 0.00001)
-print(loss_control, loss2)
-"""
+#Choosing best parameters based on previous observations explained in report
+best_lambda = lambdas[0]
+best_degree = degree[19]
 
-"""
-# PCA :
-mean = tx.mean(axis=0)
-C = tx - mean
-V = np.cov(C, rowvar=False)
-values, vectors = np.linalg.eig(V)
-print(vectors.shape)
-T = tx.dot(vectors[:, :10])
-print(T.shape)
-#explain_ratio = np.sum(values[:10])/np.sum(values)
-#print(explain_ratio)
-"""
+# Training
+weights, losses = train(y, tx)
+
+# download test data
+SET_TEST = 'data/test.csv' 
+_, tx_test, ids_test = load_csv_data(SET_TEST)
+
+# Testing
+Y_pred = test(tx_test, best_lambda, best_degree, weights)
+
+# Submission
+OUTPUT= 'Final_submission.csv' 
+final_pred = predict_labels_split(Y_pred)
+create_csv_submission(ids_test, final_pred, OUTPUT)
