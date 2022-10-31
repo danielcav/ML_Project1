@@ -125,6 +125,37 @@ def batch_iter(y, tx, batch_size, num_batches=1, shuffle=True):
         if start_index != end_index:
             yield shuffled_y[start_index:end_index], shuffled_tx[start_index:end_index]
 
+            
+def jet_num(y, tx, cat):
+    """
+    Separate data according to category of value in PRI_jet_num variable (col. 22). 
+    Three arrays with corresponding classes (either = 0, = 1 or >= 2)
+    
+    Parameter
+    ---------
+    tx : ndarray, samples and features
+    
+    Return
+    ------
+    tx_jet_num : list of three ndarrays, samples and features separated according to category
+    """
+    tx_0 = np.asarray(tx[cat == 0, :])
+    tx_1 = np.asarray(tx[cat == 1, :])
+    tx_2 = np.asarray(tx[cat >= 2, :])
+    
+    #tx_0 = np.delete(tx_0, 22, axis=1)
+    #tx_1 = np.delete(tx_1, 22, axis=1)
+    #tx_2 = np.delete(tx_2, 22, axis=1)
+    
+    y_0 = np.asarray(y[cat == 0])
+    y_1 = np.asarray(y[cat == 1])
+    y_2 = np.asarray(y[cat >= 2])
+    
+    tx_jet_num = [tx_0, tx_1, tx_2]
+    y_ = [y_0, y_1, y_2]
+    
+    return y_, tx_jet_num
+            
 
 def compute_gradient(y, tx, w):
     """
@@ -288,22 +319,85 @@ def data_processing(y, tx):
     x2 = min_max_scaling(x_clean)  # Better when we don't know the distribution of the features
 
     # Assigning values to nans
-    # We calculate the mean of all values that correspond to one type of y or the other.
-    # Then, we replace nans that correspond to one type of y with the mean of the same type.
+    # We calculate the median of all values that correspond to one type of y or the other.
+    # Then, we replace nans that correspond to one type of y with the median of the same type.
     s = np.argwhere(y == 1)
     b = np.argwhere(y == -1)
     xt = x2.T
     for index, feature in enumerate(xt):
-        mean1 = np.nanmean(feature[s])
-        mean2 = np.nanmean(feature[b])
+        med1 = np.nanmedian(feature[s])
+        med2 = np.nanmedian(feature[b])
         for s_id in s:
             if np.isnan(feature[s_id]):
-                feature[s_id] = mean1
-        feature[np.isnan(feature)] = mean2
+                feature[s_id] = med1
+        feature[np.isnan(feature)] = med2
         xt[index] = feature
     x_test = xt.T
     return x_test, to_remove
 
+
+def data_processing_test(tx):
+    """
+    Data processing applied to testing data before running algorithms.
+    Several steps are better described in the code :
+    - Feature correlations scores.
+    - Outliers and missing values processing.
+    - Data normalization.
+    - Value assignation to missing values.
+
+    Parameters
+    ----------
+    tx : ndarray, samples and features
+
+    Return
+    ------
+    x_test : ndarray, processed data
+    to_remove : indexes of missing features
+    """
+    # Generating a correlation matrix
+    spearman_matrix = np.zeros((tx.shape[1], tx.shape[1]))
+    for ind1, x1 in enumerate(tx.T):
+        for ind2, y1 in enumerate(tx.T):
+            spearman_matrix[ind1, ind2] = spearman(x1, y1)
+    matrix = np.tril(spearman_matrix, -1)
+    correlated = np.argwhere(matrix == 1)
+
+    # Counting the ratio of missing values per feature
+    ratios = []
+    for feature in tx.T:
+        ratio = np.count_nonzero(feature == -999) / tx.shape[0]
+        ratios.append(ratio)
+
+    # Removing correlated features (with correlation score = 1)
+    # To choose the feature with the most information we use the ratio of missing
+    # values and remove the feature with the biggest ratio (less information, we assume).
+    to_remove = set()
+    for position in correlated:
+        if ratios[position[0]] >= ratios[position[1]]:
+            to_remove.add(position[0])
+        else:
+            to_remove.add(position[1])
+
+    x_clean = np.delete(tx, list(to_remove), axis=1)
+
+    # Process unusable values and outliers
+    x_clean[np.where(x_clean == -999)] = np.nan  # Removing unusable values for better data normalization
+    x_clean = reduce_outliers(x_clean)  # Assigning mean or median values to outliers
+
+    # Standardize data using either Z-score or Min-Max method
+    # Do this before assigning values to nan values -> better standardization
+    x2 = min_max_scaling(x_clean)  # Better when we don't know the distribution of the features
+
+    # Assigning values to nans
+    # We calculate the median of all values.
+    # Then, we replace nans with the median of the feature.
+    xt = x2.T
+    for index, feature in enumerate(xt):
+        med = np.nanmedian(feature)
+        feature[np.isnan(feature)] = med
+        xt[index] = feature
+    x_test = xt.T
+    return x_test, to_remove
 
 def polynomial_features(x, features, degree=2):
     """
