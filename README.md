@@ -17,11 +17,15 @@ a signal (Higgs boson) or a background (something else).
   * __run.py__ is the main script that was used to generate our predictions.
   * __helpers.py__ regroups basic functions for .csv importation and generation.
   * __data.zip__ .csv files regrouping different data sets used for the prediction and the submission.
+Unzip the file before running the program.
 ### The prediction
   To get a final prediction of 73.7%, we used Ridge Regression
   method with a lambda = 10^-9.
   We applied some data processing beforehand, performed a polynomial feature augmentation without cross-interactions
   and split the data.
-  You can achieve the same results by running the script in __run.py__.
+  The results are stored in a file called __Final_submission.csv__.
+  
+You can achieve the same results by running the script in __run.py__.
+
 
   
